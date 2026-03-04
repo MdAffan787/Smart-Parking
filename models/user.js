@@ -22,6 +22,7 @@ const userSchema=mongoose.Schema({
      },
      createdAt:{
         type:String,
+        default:Date(),
      }
     
 },{timestamps: true})
