@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Parking Spot</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f3f4f6; margin: 0; padding: 40px; display: flex; justify-content: center; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 900px; display: flex; gap: 30px; flex-wrap: wrap; }
+        .form-section { flex: 1; min-width: 300px; }
+        .map-section { flex: 1; min-width: 300px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; font-size: 14px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        button:hover { background: #1d4ed8; }
+        #map { height: 350px; width: 100%; border-radius: 5px; border: 1px solid #ccc; margin-top: 5px;}
+        .hint { font-size: 12px; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="form-section">
+            <h2>Add a Parking Spot</h2>
+            <form action="/spot" method="POST">
+                
+                <div class="form-group">
+                    <label for="area">Area</label>
+                    <input type="text" id="area" name="area" required placeholder="e.g., Indiranagar">
+                </div>
+                
+                <div class="form-group">
+                    <label for="landmark">Landmark</label>
+                    <input type="text" id="landmark" name="landmark" placeholder="e.g., Next to Metro Station">
+                </div>
+
+                <div class="form-group">
+                    <label for="pricePerHr">Price Per Hour (₹)</label>
+                    <input type="number" id="pricePerHr" name="pricePerHr" placeholder="50" 50>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="isActive" value="true" checked> 
+                        Spot is currently active and available
+                    </label>
+                </div>
+
+                <input type="hidden" id="lat" name="lat">
+                <input type="hidden" id="lng" name="lng">
+
+                <button type="submit">Submit Spot</button>
+            </form>
+        </div>
+
+        <div class="map-section">
+            <label>Pinpoint Location</label>
+            <div id="map"></div>
+            <div class="hint">Click anywhere on the map to drop a pin and auto-fill the Area.</div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. Initialize map (Centered on Bangalore)
+        var map = L.map('map').setView([12.9716, 77.5946], 12);
+
+        // 2. Add free OpenStreetMap tiles
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        var marker = null;
+
+        // 3. Listen for clicks on the map
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+
+            // Remove old marker if it exists
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add new marker
+            marker = L.marker([lat, lng]).addTo(map);
+
+            // Fill the hidden inputs so the backend receives the coordinates
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+
+            // 4. Reverse Geocoding (Convert coordinates back to a place name)
+            var url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if(data && data.address) {
+                        // Try to get the neighborhood, suburb, or city to fill the "Area" input
+                        var areaName = data.address.neighbourhood || data.address.suburb || data.address.city || data.name;
+                        if(areaName) {
+                            document.getElementById('area').value = areaName;
+                        }
+                    }
+                })
+                .catch(err => console.log("Error fetching address:", err));
+        });
+    </script>
+</body>
+</html>

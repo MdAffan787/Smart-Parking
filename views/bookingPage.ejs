@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Parking Spot</title>
+    <style>
+        body { font-family: sans-serif; background: #f3f4f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #111827; }
+        label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; color: #374151; }
+        
+        /* Updated to target the new "time" inputs */
+        input[type="time"] { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        
+        button { background: #16a34a; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 25px; }
+        button:hover { background: #15803d; }
+        .cancel-link { display: block; text-align: center; margin-top: 15px; color: #2563eb; text-decoration: none; font-size: 14px; }
+        .cancel-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Reserve this Spot</h2>
+        <p style="color: #666; font-size: 14px;">Select your arrival and departure times for today to secure your parking space.</p>
+        
+        <form action="/booking/create/<%= spotId %>" method="POST">
+            
+            <label>Start Time</label>
+            <input type="time" name="startTime" required>
+            
+            <label>End Time</label>
+            <input type="time" name="endTime" required>
+            
+            <button type="submit">Confirm Booking</button>
+        </form>
+
+        <a href="/user" class="cancel-link">Cancel and return to map</a>
+    </div>
+</body>
+</html>

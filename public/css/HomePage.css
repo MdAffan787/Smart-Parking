@@ -1,0 +1,45 @@
+/* Reset basic styling for a clean slate */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Style the body to act as a full-screen centered container */
+body {
+    display: flex;
+    flex-direction: row; /* Aligns the links side-by-side */
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    min-height: 100vh; /* Takes up the full height of the viewport */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    gap: 30px; /* Adds space between the buttons */
+}
+
+/* Style the links to look like modern buttons */
+a {
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #2563eb; /* A nice modern blue */
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease; /* Smooth animation for hover effects */
+}
+
+/* Add hover effects for interactivity */
+a:hover {
+    background-color: #1d4ed8; /* Slightly darker blue on hover */
+    transform: translateY(-3px); /* Moves the button up slightly */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Add active effects for when the button is clicked */
+a:active {
+    transform: translateY(0); /* Returns the button to its original position */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

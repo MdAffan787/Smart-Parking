@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <title>Find Parking</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f3f4f6; }
+        #search-box { margin-bottom: 15px; display: flex; gap: 10px; }
+        #search-input { padding: 10px; width: 300px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #1d4ed8; }
+        #map { height: 600px; width: 100%; border-radius: 8px; border: 2px solid #ccc; }
+        
+        /* Popup Styling */
+        .spot-popup { font-family: Arial, sans-serif; line-height: 1.5; }
+        .spot-price { color: #16a34a; font-weight: bold; font-size: 16px; }
+        .book-btn { background: #16a34a; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 10px; text-align: center; }
+        .book-btn:hover { background: #15803d; }
+    </style>
+</head>
+<body>
+<div>
+
+   <h2>Find Available Parking Spots</h2>
+
+    <div id="search-box">
+        <input type="text" id="search-input" placeholder="Enter a location (e.g., KR Market, Indiranagar)">
+        <button onclick="searchLocation()">Search Area</button>
+        <a href="/">GO BACK</a>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. Initialize map to a default location (Bangalore)
+        var map = L.map('map').setView([12.9716, 77.5946], 12);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+        
+        // 2. Securely load spots from MongoDB (falls back to empty array if undefined)
+        const spots = <%- JSON.stringify(spots || []) %>;
+
+        // 3. Loop through database spots and draw pins
+        spots.forEach(function(spot) {
+            if (spot.lat && spot.lng) {
+                const popupContent = `
+                    <div class="spot-popup">
+                        <b>${spot.area}</b><br>
+                        ${spot.landmark ? spot.landmark + '<br>' : ''}
+                        <span class="spot-price">₹${spot.pricePerHr} / hr</span><br>
+                        <a href="/booking/create/${spot._id}" class="book-btn">Book Now</a>
+                    </div>
+                `;
+                L.marker([spot.lat, spot.lng]).addTo(map).bindPopup(popupContent);
+            }
+        });
+
+        // 4. The Simplified MVP Search Function (Text Search)
+        function searchLocation() {
+
+            var query = document.getElementById('search-input').value.toLowerCase().trim();
+
+
+            if (!query) return;
+
+            
+
+            var matchingSpots = spots.filter(function(spot) {
+                var matchesArea = spot.area.toLowerCase().includes(query);
+                var matchesLandmark = spot.landmark && spot.landmark.toLowerCase().includes(query);
+                return matchesArea || matchesLandmark;
+            });
+
+            if (matchingSpots.length > 0) {
+                alert(`✅ Found ${matchingSpots.length} parking spot(s) near "${query}".`);
+                var firstSpot = matchingSpots[0];
+                map.setView([firstSpot.lat, firstSpot.lng], 15); 
+            } else {
+                alert(`❌ Sorry, we don't have any registered parking spots matching "${query}" right now.`);
+            }
+        }
+
+        // ==========================================
+        // 5. CLICK ON MAP TO FIND NEARBY SPOTS
+        // ==========================================
+        map.on('click', function(e) {
+            var clickedLat = e.latlng.lat;
+            var clickedLng = e.latlng.lng;
+            var clickPoint = L.latLng(clickedLat, clickedLng);
+
+            var closestSpot = null;
+            var shortestDistance = Infinity;
+
+            // Find the closest spot to where the user clicked
+            spots.forEach(function(spot) {
+                if (spot.lat && spot.lng) {
+                    var spotPoint = L.latLng(spot.lat, spot.lng);
+                    var distanceInMeters = clickPoint.distanceTo(spotPoint);
+
+                    if (distanceInMeters < shortestDistance) {
+                        shortestDistance = distanceInMeters;
+                        closestSpot = spot;
+                    }
+                }
+            });
+
+            // If a spot is within 3000 meters (3km), alert the user and zoom in!
+            if (closestSpot && shortestDistance <= 3000) { 
+                var distanceInKm = (shortestDistance / 1000).toFixed(1);
+                alert(`✅ Found a parking spot in ${closestSpot.area} just ${distanceInKm} km from where you clicked!`);
+                map.setView([closestSpot.lat, closestSpot.lng], 15);
+            } else {
+                alert("❌ No parking spots found within 3km of where you clicked.");
+            }
+        });
+    </script>
+</body>
+</html>
