@@ -14,11 +14,9 @@ app.use(cors({
 }));
 
 
-const path=require('path');
-app.set("view engine","ejs");
+
 app.use(express.json());
 app.use(express.urlencoded({extended : true}));
-app.use(express.static(path.join(__dirname,'public')));
 const db = require('./config/model.js');
 
 const userRouter=require("./routers/user.js")
@@ -32,9 +30,6 @@ app.use("/spot",spotRouter);
 app.use("/booking",bookingRouter);
 app.use("/ai",aiRouter);
 
-
-app.get("/",function(req,res){
-    res.render("homePage.ejs")});
 
 db.once("open", async () => {
   console.log("✅ MongoDB Connected!");

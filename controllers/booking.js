@@ -1,24 +1,22 @@
 const bookingModel=require("../models/booking.js");
 const redisClient = require("../config/redis");
 
-module.exports.bookingPage=(req,res)=>{
-  try{
-    res.render("bookingPage.ejs",{spotId:req.params.id});
-  }
-  catch(err){
-    console.log("The error is",err.massege);
-     res.status(500).json({ error: err.message });
 
-  }
-}
 module.exports.createBooking=async (req,res)=>{
     try {
         const {startTime, endTime } = req.body;
         const spotId = req.params.id;
-        const today = new Date().toISOString().split("T")[0];
-        const startDateTime = new Date(`${today}T${startTime}`);
-        const endDateTime = new Date(`${today}T${endTime}`);
-    
+        const today = new Date();
+
+const [sh, sm] = startTime.split(":").map(Number);
+const [eh, em] = endTime.split(":").map(Number);
+
+const startDateTime = new Date();
+startDateTime.setHours(sh, sm, 0, 0);
+
+const endDateTime = new Date();
+endDateTime.setHours(eh, em, 0, 0);
+
         const conflict = await bookingModel.findOne({
           spotId,
           status: { $ne: "CANCELLED" },
@@ -41,42 +39,17 @@ module.exports.createBooking=async (req,res)=>{
          "availableSpots"
         );
     
-       return res.redirect("/user"); 
+       return res.status(201).json({
+    success: true,
+    message: "Spot Booked"
+});
       }
        catch (err) {
+        console.log(err.massege);
         res.status(500).json({ error: err.message });
       }
     };
- module.exports.cancleBooking=async(req,res)=>{
-  try{
-        const { bookingId } = req.params;
-        const booking =await bookingModel.findById(bookingId);
-        if(!booking)
-        {
-           return res.status(404).json({
-        message: "Booking not found"
-      });
-        }
-            if (booking.status === "COMPLETED") {
-      return res.status(400).json({
-        message: "Booking already completed"
-      });
-    }
 
-    booking.status = "CANCELLED";
-    await booking.save();
-      res.status(200).json({
-      message: "Booking cancelled successfully",
-      booking
-    });
-
-  }
-  catch(err){
- res.status(500).json({
-      message: err.message
-    });
-  }
- };
  module.exports.completeBooking=async(req,res)=>{
   try{
      const { bookingId } = req.params;
@@ -98,7 +71,10 @@ module.exports.createBooking=async (req,res)=>{
     }
       booking.status = "COMPLETED";
     await booking.save();
-      res.status(200).json({
+    await redisClient.del(
+                 "availableSpots"
+                );
+      return res.status(200).json({
       message: "Booking completed successfully",
       booking
     });

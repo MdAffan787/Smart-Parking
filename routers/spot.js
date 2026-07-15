@@ -6,15 +6,14 @@ const router=express.Router()
 
 router.post("/",isAuth,createSpot)
 
-router.get("/",Spots)
+router.get("/",isAuth,Spots)
 
 
-router.post("/:id",owerSpot)
+router.get("/owner",isAuth,owerSpot)
 
-router.patch("/:id",update)
+router.patch("/:id",isAuth,update)
 
 
-router.delete("/:id",spotDelete)
 
 
 module.exports=router;
