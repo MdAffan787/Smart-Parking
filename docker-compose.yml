@@ -3,10 +3,11 @@ services:
   redis:
     image: redis
     container_name: redis-server
+
     ports:
       - "6379:6379"
 
-  app:
+  backend:
     build: .
     container_name: smart-parking-app
 
@@ -14,10 +15,30 @@ services:
       - "3000:3000"
 
     environment:
-      - REDIS_URL=redis://redis:6379
-      - JWT_KEY=mysupersecretkey
-      - MONGODB_URI=mongodb://host.docker.internal:27017/parkingdb
-      - Gemini_API=${Gemini_API}
+      REDIS_URL: redis://redis:6379
+      JWT_KEY: mysupersecretkey
+      MONGODB_URI: mongodb://host.docker.internal:27017/parkingdb
+      Gemini_API: ${Gemini_API}
 
     depends_on:
       - redis
+
+    command: npm start
+
+  frontend:
+    build: ./frontend
+    container_name: smart-parking-frontend
+
+    ports:
+      - "5173:5173"
+
+    working_dir: /app
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+    depends_on:
+      - backend
+
+    command: npm run dev -- --host
