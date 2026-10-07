@@ -68,7 +68,7 @@ res.cookie("token", token);
     }
     catch(err)
     {
-        res.status(503).json({massege:"user is alredy exist"})
+        res.status(403).json({massege:"user is alredy exist"})
     }
 }
 

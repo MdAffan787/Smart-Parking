@@ -5,7 +5,7 @@ const spotModel=require("../models/spot.js");
 exports.createSpot = async (req, res) => {
     try {
         // 1. Get the data from the user's form
-        await redisClient.del("availableSpots");
+        
         const { area, landmark, pricePerHr,lat,lng,isActive  } = req.body;
         const randomLatShift = (Math.random() - 0.5) * 0.1;
         const randomLngShift = (Math.random() - 0.5) * 0.1;

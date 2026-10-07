@@ -110,6 +110,10 @@ module.exports.createBooking = async (req, res) => {
 
     }
 };
+
+
+
+
  module.exports.completeBooking=async(req,res)=>{
   try{
      const { bookingId } = req.params;
@@ -125,7 +129,7 @@ module.exports.createBooking = async (req, res) => {
           return res.status(400).json({massege:"your not allow to complete the booking"});
         }
          if (booking.status === "COMPLETED") {
-      return res.status(400).json({
+            return res.status(400).json({
         message: "Booking already completed"
       });
     }
