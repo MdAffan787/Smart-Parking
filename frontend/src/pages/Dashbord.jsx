@@ -75,25 +75,12 @@ function Dashboard() {
 
       <br /><br />
 
-      <Link to="/mySpots">
-        <button>🏠 My Parking Spots</button>
-      </Link>
-
-      <br /><br />
+     
 
       <Link to="/history">
         <button>📖 Booking History</button>
       </Link>
 
-      <br /><br />
-
-      <Link to="/profile">
-        <button>👤 Profile</button>
-      </Link>
-
-      <br /><br />
-
-      <button>🚪 Logout</button>
 
        <br /><br />
 

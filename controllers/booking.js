@@ -21,7 +21,7 @@ module.exports.createBooking = async (req, res) => {
         // -----------------------------
         locked = await redisClient.set(
             lockKey,
-            req.userId,
+            String(req.userId),
             {
                 NX: true,
                 EX: 10
